@@ -9,18 +9,24 @@ using System.IO;
 
 public class PlayerDataManager : MonoBehaviour
 {
-    public TMP_InputField playerName;
-    public TMP_InputField playerPhone;
-    public TMP_InputField playerMail;
-    public Button confirmButton;
-
     [System.Serializable]
     public class PlayerData
     {
         public string playerName;
         public string playerPhone;
         public string playerMail;
+        public PlayerData(string name, string phone, string mail)
+        {
+            playerName = name;
+            playerPhone = phone;
+            playerMail = mail;
+        }
     }
+    public TMP_InputField playerName;
+    public TMP_InputField playerPhone;
+    public TMP_InputField playerMail;
+    public Button confirmButton;
+
     void Start()
     {
         confirmButton.onClick.AddListener(OnConfirmButtonClick);
@@ -42,14 +48,14 @@ public class PlayerDataManager : MonoBehaviour
             return;
         }
 
-        PlayerData playerData = new PlayerData();
-        playerData.playerName = name;
-        playerData.playerName = phone;
-        playerData.playerName = mail;
+        PlayerData playerData = new PlayerData(name, phone, mail);
 
         // Convert player data to JSON string
         string json = JsonUtility.ToJson(playerData);
         string filePath = Application.persistentDataPath + "/playerData.json";
+
+        // Emit data to server 
+        SocketInstance.Instance.RegisterEmitSocketEvent("userRegister", json);
 
         File.WriteAllText(filePath, json);
         Debug.Log("Player data saved to: " + filePath);
